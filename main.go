@@ -13,8 +13,11 @@ var prob = []bool{true, true, false, false, false}
 
 var curRand *rand.Rand
 
+var messages map[int64]map[string]*tgbotapi.Message
+
 func init() {
 	curRand = rand.New(rand.NewSource(time.Now().Unix()))
+	messages = make(map[int64]map[string]*tgbotapi.Message)
 }
 
 func main() {
@@ -34,31 +37,44 @@ func main() {
 
 	updates, err := bot.GetUpdatesChan(u)
 
-	names := getNames()
-
-	if len(names) < 1 {
-		log.Fatal("no names in env")
-	}
-
 	for update := range updates {
-		if update.Message == nil || update.Message.Text == "" || !stringInSlice(update.Message.From.UserName, names) || !weightedRandom() { // ignore any non-Message Updates
+		if update.Message == nil {
 			continue
 		}
-
-		gif := tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAMdYGDU-aGj-BAjTa0dGviX35Z0gP4AAjYCAALYL5VSHxQhj1TU2cYeBA")
-		gif.Caption = randomCase(update.Message.Text)
-		gif.ReplyToMessageID = update.Message.MessageID
-		_, err = bot.Send(gif)
-
-		if err != nil {
-			log.Println(err)
+		if update.Message.IsCommand() {
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+			switch update.Message.Command() {
+			case "help":
+				msg.Text = "type /durr [first name]."
+				_, _ = bot.Send(msg)
+			case "durr":
+				gif := tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAMdYGDU-aGj-BAjTa0dGviX35Z0gP4AAjYCAALYL5VSHxQhj1TU2cYeBA")
+				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
+					gif.Caption = randomCase("hurr durr, they have no messages in here yet")
+				} else {
+					gif.Caption = randomCase(message.Text)
+					gif.ReplyToMessageID = message.MessageID
+				}
+				_, _ = bot.Send(gif)
+				continue
+			case "fuckyou":
+				gif := tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIBGGBhJ_lZyDk1_YmahLEsqFZ1ON9MAAJxAgACeqeMUjwXqK1QN7qGHgQ")
+				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
+					gif.Caption = randomCase("hurr durr, they have no messages in here yet")
+				} else {
+					gif.ReplyToMessageID = message.MessageID
+				}
+				_, _ = bot.Send(gif)
+			default:
+				continue
+			}
+		} else {
+			if messages[update.Message.Chat.ID] == nil {
+				messages[update.Message.Chat.ID] = make(map[string]*tgbotapi.Message)
+			}
+			messages[update.Message.Chat.ID][strings.ToLower(update.Message.From.FirstName)] = update.Message
 		}
 	}
-}
-
-func getNames() []string {
-	nameEnv := os.Getenv("TELEGRAM_TARGETS")
-	return strings.Split(nameEnv, ",")
 }
 
 func randomCase(message string) string {
@@ -76,13 +92,4 @@ func randomCase(message string) string {
 
 func weightedRandom() bool {
 	return prob[curRand.Intn(len(prob)-1)]
-}
-
-func stringInSlice(a string, list []string) bool {
-	for _, b := range list {
-		if b == a {
-			return true
-		}
-	}
-	return false
 }
