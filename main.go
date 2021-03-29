@@ -53,7 +53,6 @@ func main() {
 					gif.ReplyToMessageID = message.MessageID
 				}
 				_, _ = bot.Send(gif)
-				continue
 			case "fuckyou":
 				gif := tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIBGGBhJ_lZyDk1_YmahLEsqFZ1ON9MAAJxAgACeqeMUjwXqK1QN7qGHgQ")
 				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
