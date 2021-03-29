@@ -65,6 +65,14 @@ func main() {
 					gif.ReplyToMessageID = message.MessageID
 				}
 				_, _ = bot.Send(gif)
+			case "sploosh":
+				gif := tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIBVWBhLj-iPzQzDDiwNi75UT7bTKk2AAKDAgACg0mNUnjNm9ca7IUmHgQ")
+				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
+					gif.Caption = randomCase("hurr durr, they have no messages in here yet")
+				} else {
+					gif.ReplyToMessageID = message.MessageID
+				}
+				_, _ = bot.Send(gif)
 			default:
 				continue
 			}
