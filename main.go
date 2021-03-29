@@ -47,7 +47,7 @@ func main() {
 			case "durr":
 				gif := tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAMdYGDU-aGj-BAjTa0dGviX35Z0gP4AAjYCAALYL5VSHxQhj1TU2cYeBA")
 				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
-					gif.Caption = randomCase(fmt.Sprintf("hurr durr %s, %s has no messages in here yet", update.Message.From.FirstName, update.Message.CommandArguments()))
+					gif.Caption = randomCase(fmt.Sprintf("hurr durr %s, %s has no messages in here yet", update.Message.From.FirstName, strings.ToTitle(update.Message.CommandArguments())))
 				} else {
 					gif.Caption = randomCase(message.Text)
 					gif.ReplyToMessageID = message.MessageID
@@ -57,7 +57,7 @@ func main() {
 			case "fuckyou":
 				gif := tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIBGGBhJ_lZyDk1_YmahLEsqFZ1ON9MAAJxAgACeqeMUjwXqK1QN7qGHgQ")
 				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
-					gif.Caption = fmt.Sprintf("Hey, hey %s. Fuck you, no messages from %s yet", update.Message.From.FirstName, update.Message.CommandArguments())
+					gif.Caption = fmt.Sprintf("Hey, hey %s. Fuck you, no messages from %s yet", update.Message.From.FirstName, strings.ToTitle(update.Message.CommandArguments()))
 				} else {
 					gif.ReplyToMessageID = message.MessageID
 				}
@@ -65,7 +65,7 @@ func main() {
 			case "sploosh":
 				gif := tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIBVWBhLj-iPzQzDDiwNi75UT7bTKk2AAKDAgACg0mNUnjNm9ca7IUmHgQ")
 				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
-					gif.Caption = fmt.Sprintf("You splooshed for nothing %s, %s has no messages in here yet", update.Message.From.FirstName, update.Message.CommandArguments())
+					gif.Caption = fmt.Sprintf("You splooshed for nothing %s, %s has no messages in here yet", update.Message.From.FirstName, strings.ToTitle(update.Message.CommandArguments()))
 				} else {
 					gif.ReplyToMessageID = message.MessageID
 				}
