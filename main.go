@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"log"
 	"math/rand"
@@ -42,15 +43,11 @@ func main() {
 			continue
 		}
 		if update.Message.IsCommand() {
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 			switch update.Message.Command() {
-			case "help":
-				msg.Text = "type /durr [first name]."
-				_, _ = bot.Send(msg)
 			case "durr":
 				gif := tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAMdYGDU-aGj-BAjTa0dGviX35Z0gP4AAjYCAALYL5VSHxQhj1TU2cYeBA")
 				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
-					gif.Caption = randomCase("hurr durr, they have no messages in here yet")
+					gif.Caption = randomCase(fmt.Sprintf("hurr durr %s, %s has no messages in here yet", update.Message.From.FirstName, update.Message.CommandArguments()))
 				} else {
 					gif.Caption = randomCase(message.Text)
 					gif.ReplyToMessageID = message.MessageID
@@ -60,7 +57,7 @@ func main() {
 			case "fuckyou":
 				gif := tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIBGGBhJ_lZyDk1_YmahLEsqFZ1ON9MAAJxAgACeqeMUjwXqK1QN7qGHgQ")
 				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
-					gif.Caption = randomCase("hurr durr, they have no messages in here yet")
+					gif.Caption = fmt.Sprintf("Hey, hey %s. Fuck you, no messages from %s yet", update.Message.From.FirstName, update.Message.CommandArguments())
 				} else {
 					gif.ReplyToMessageID = message.MessageID
 				}
@@ -68,7 +65,7 @@ func main() {
 			case "sploosh":
 				gif := tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIBVWBhLj-iPzQzDDiwNi75UT7bTKk2AAKDAgACg0mNUnjNm9ca7IUmHgQ")
 				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
-					gif.Caption = randomCase("hurr durr, they have no messages in here yet")
+					gif.Caption = fmt.Sprintf("You splooshed for nothing %s, %s has no messages in here yet", update.Message.From.FirstName, update.Message.CommandArguments())
 				} else {
 					gif.ReplyToMessageID = message.MessageID
 				}
