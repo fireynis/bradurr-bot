@@ -89,6 +89,13 @@ func main() {
 				} else {
 					gif.ReplyToMessageID = message.MessageID
 				}
+			case "stfu":
+				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIEt2BifSIpPjUgjgABIlXtU6dV7fsOeQACUAIAAp49jFJFzO_VtudJUh4E")
+				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
+					gif.Caption = fmt.Sprintf("No one cares, STFU %s!", update.Message.From.FirstName)
+				} else {
+					gif.ReplyToMessageID = message.MessageID
+				}
 			default:
 				continue
 			}
