@@ -18,7 +18,7 @@ jobs:
       - name: Build
         run: go build -o bradurr_bot
         env:
-          GOOS: Linux
+          GOOS: linux
           GOARCH: amd64
 
       - name: Test
