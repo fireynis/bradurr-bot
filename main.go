@@ -16,6 +16,8 @@ var prob = []bool{true, true, false, false, false}
 
 var curRand *rand.Rand
 
+var logAll bool
+
 var messages map[int64]map[string]*tgbotapi.Message
 
 func init() {
@@ -33,6 +35,7 @@ func main() {
 
 	if os.Getenv("BOT_ENV") != "production" {
 		bot.Debug = true
+		logAll = true
 	}
 
 	starter, err := zap.NewProduction()
@@ -51,121 +54,164 @@ func main() {
 	updates, err := bot.GetUpdatesChan(u)
 
 	for update := range updates {
+		if logAll {
+			if update.Message.ReplyToMessage != nil {
+				logger.Infow(
+					"reply to message occurred",
+					zap.Int("message_id", update.Message.ReplyToMessage.MessageID),
+				)
+			}
+		}
 		if update.Message == nil {
 			continue
 		}
 		if update.Message.IsCommand() {
-			if strings.ToLower(update.Message.Command()) == "getgif" && update.Message.Chat.IsPrivate() {
+			commandName := strings.ToLower(update.Message.Command())
+			var gif tgbotapi.AnimationConfig
+			switch commandName {
+			case "getgif":
+				if !update.Message.Chat.IsPrivate() {
+					continue
+				}
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.From.FirstName)]; !ok || message.Document == nil || message.Document.FileID == "" {
+				replyMessage, err := getMessage(&update)
+				if err != nil || replyMessage.Document == nil || replyMessage.Document.FileID == "" {
 					msg.Text = "We ain't found shit"
 				} else {
-					msg.Text = message.Document.FileID
+					msg.Text = replyMessage.Document.FileID
 					_, _ = bot.Send(msg)
 				}
-			}
-			var gif tgbotapi.AnimationConfig
-			switch strings.ToLower(update.Message.Command()) {
+				continue
 			case "durr":
-				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAMdYGDU-aGj-BAjTa0dGviX35Z0gP4AAjYCAALYL5VSHxQhj1TU2cYeBA")
-				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
-					gif.Caption = randomCase(fmt.Sprintf("hurr durr %s, %s has no messages in here yet", update.Message.From.FirstName, strings.ToTitle(update.Message.CommandArguments())))
-				} else {
-					gif.Caption = randomCase(message.Text)
-					gif.ReplyToMessageID = message.MessageID
-				}
+				gif = gifGenerate(
+					&update,
+					"CgACAgQAAxkBAAIF9WBjq7WaXMQmzKv6dNMlyuTXJM19AAI2AgAC2C-VUh8UIY9U1NnGHgQ",
+					fmt.Sprintf(
+						"hurr durr %s, %s has no messages in here yet",
+						update.Message.From.FirstName,
+						strings.ToTitle(update.Message.CommandArguments()),
+					),
+					true,
+					true,
+				)
+				break
 			case "cowboy":
-				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "AAMCBAADGQEAAgRsYGJwCA_1mY1qydjoehoFzS0S4ZwAAnACAALAMa1SBU-G3K6fQJXYIpQmXQADAQAHbQADb18AAh4E")
-				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
-					gif.Caption = randomCase(fmt.Sprintf("Nobody here, but still horny %s", update.Message.From.FirstName))
-				} else {
-					gif.Caption = message.Text
-					gif.ReplyToMessageID = message.MessageID
-				}
+				gif = gifGenerate(
+					&update,
+					"AAMCBAADGQEAAgRsYGJwCA_1mY1qydjoehoFzS0S4ZwAAnACAALAMa1SBU-G3K6fQJXYIpQmXQADAQAHbQADb18AAh4E",
+					fmt.Sprintf("Nobody here, but still horny %s", update.Message.From.FirstName),
+					false,
+					false,
+				)
+				break
 			case "fuckyou":
-				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIBGGBhJ_lZyDk1_YmahLEsqFZ1ON9MAAJxAgACeqeMUjwXqK1QN7qGHgQ")
-				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
-					gif.Caption = fmt.Sprintf("Hey, hey %s. Fuck you, no messages from %s yet", update.Message.From.FirstName, strings.ToTitle(update.Message.CommandArguments()))
-				} else {
-					gif.ReplyToMessageID = message.MessageID
-				}
+				gif = gifGenerate(
+					&update,
+					"CgACAgQAAxkBAAIF72Bjq4Am72Oc5PYPAfAd_Py-loqNAAJxAgACeqeMUjwXqK1QN7qGHgQ",
+					fmt.Sprintf("Hey, hey %s. Fuck you, no messages from %s yet", update.Message.From.FirstName, strings.ToTitle(update.Message.CommandArguments())),
+					false,
+					false,
+				)
+				break
 			case "sploosh":
-				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIBVWBhLj-iPzQzDDiwNi75UT7bTKk2AAKDAgACg0mNUnjNm9ca7IUmHgQ")
-				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
-					gif.Caption = fmt.Sprintf("You splooshed for nothing %s, %s has no messages in here yet", update.Message.From.FirstName, strings.ToTitle(update.Message.CommandArguments()))
-				} else {
-					gif.ReplyToMessageID = message.MessageID
-				}
+				gif = gifGenerate(
+					&update,
+					"CgACAgQAAxkBAAIBVWBhLj-iPzQzDDiwNi75UT7bTKk2AAKDAgACg0mNUnjNm9ca7IUmHgQ",
+					fmt.Sprintf("You splooshed for nothing %s, %s has no messages in here yet", update.Message.From.FirstName, strings.ToTitle(update.Message.CommandArguments())),
+					false,
+					false,
+				)
+				break
 			case "goldstar":
-				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAICOGBiJptsJgqu7CjI7wglyFpry5rFAAJUAgACu-uVUt2pTnE70uewHgQ")
-				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
-					gif.Caption = fmt.Sprintf("%s gets a dumbass gold star for no name sent, what a dumbass!", update.Message.From.FirstName)
-				} else {
-					gif.ReplyToMessageID = message.MessageID
-				}
+				gif = gifGenerate(
+					&update,
+					"CgACAgQAAxkBAAICOGBiJptsJgqu7CjI7wglyFpry5rFAAJUAgACu-uVUt2pTnE70uewHgQ",
+					fmt.Sprintf("%s gets a dumbass gold star for no name sent, what a dumbass!", update.Message.From.FirstName),
+					false,
+					false,
+				)
+				break
 			case "magma":
-				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgEAAxkBAAIEcmBicgTC9R0ZMNginJB6ewKudpfhAAJsAQACXyUQR0jwan3HzlslHgQ")
-				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
-					gif.Caption = fmt.Sprintf("Not fucking lava dude %s", update.Message.From.FirstName)
-				} else {
-					gif.ReplyToMessageID = message.MessageID
-				}
+				gif = gifGenerate(
+					&update,
+					"CgACAgEAAxkBAAIEcmBicgTC9R0ZMNginJB6ewKudpfhAAJsAQACXyUQR0jwan3HzlslHgQ",
+					fmt.Sprintf("Not fucking lava dude %s", update.Message.From.FirstName),
+					false,
+					false,
+				)
+				break
 			case "boobs":
-				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIEpmBieuj2CmF42NGZFMj5-LViv7sNAAIqAgACno3sUSMPJOU4zQYYHgQ")
-				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
-					gif.Caption = fmt.Sprintf("%s, you thirsty?", update.Message.From.FirstName)
-				} else {
-					gif.ReplyToMessageID = message.MessageID
-				}
+				gif = gifGenerate(
+					&update,
+					"CgACAgQAAxkBAAIEpmBieuj2CmF42NGZFMj5-LViv7sNAAIqAgACno3sUSMPJOU4zQYYHgQ",
+					fmt.Sprintf("%s, you thirsty?", update.Message.From.FirstName),
+					false,
+					false,
+				)
+				break
 			case "danger":
-				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIEsGBie58bKOeSXEHrVrvh-Gta5Wk_AAIrAgACiX-VUpZXPFLOB0VfHgQ")
-				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
-					gif.Caption = fmt.Sprintf("%s, YOU DON'T REALLY EXIST", update.Message.From.FirstName)
-				} else {
-					gif.ReplyToMessageID = message.MessageID
-				}
+				gif = gifGenerate(
+					&update,
+					"CgACAgQAAxkBAAIEsGBie58bKOeSXEHrVrvh-Gta5Wk_AAIrAgACiX-VUpZXPFLOB0VfHgQ",
+					fmt.Sprintf("%s, eat to much paste?", update.Message.From.FirstName),
+					false,
+					false,
+				)
+				break
 			case "nerd":
-				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIEs2BifFqTRTFAL-cM4Bhv66NW-FBoAAIaAgACP7CcUooP90RkGHy0HgQ")
-				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
-					gif.Caption = fmt.Sprintf("%s, no user name? Fuckin nerd.", update.Message.From.FirstName)
-				} else {
-					gif.ReplyToMessageID = message.MessageID
-				}
+				gif = gifGenerate(
+					&update,
+					"CgACAgQAAxkBAAIEs2BifFqTRTFAL-cM4Bhv66NW-FBoAAIaAgACP7CcUooP90RkGHy0HgQ",
+					fmt.Sprintf("%s, no user name? Fuckin nerd.", update.Message.From.FirstName),
+					false,
+					false,
+				)
+				break
 			case "yousuck":
-				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIEv2BifdkT3G_j-GANz0CufXCvdHZuAAITAgACuhqsUcCIL8xUN9IfHgQ")
-				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
-					gif.Caption = fmt.Sprintf("%s, you suck donkey dick", update.Message.From.FirstName)
-				} else {
-					gif.ReplyToMessageID = message.MessageID
-				}
+				gif = gifGenerate(
+					&update,
+					"CgACAgQAAxkBAAIEv2BifdkT3G_j-GANz0CufXCvdHZuAAITAgACuhqsUcCIL8xUN9IfHgQ",
+					fmt.Sprintf("%s, you suck donkey dick", update.Message.From.FirstName),
+					false,
+					false,
+				)
+				break
 			case "donkey":
-				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIEwmBifh6-60ypp0HnpFvbfLefd54TAAJHAgACv26lUrwh-zTY0RjfHgQ")
-				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
-					gif.Caption = fmt.Sprintf("%s, you're the donkey", update.Message.From.FirstName)
-				} else {
-					gif.ReplyToMessageID = message.MessageID
-				}
+				gif = gifGenerate(
+					&update,
+					"CgACAgQAAxkBAAIEwmBifh6-60ypp0HnpFvbfLefd54TAAJHAgACv26lUrwh-zTY0RjfHgQ",
+					fmt.Sprintf("%s, you're the donkey", update.Message.From.FirstName),
+					false,
+					false,
+				)
+				break
 			case "drool":
-				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIEi2BidvEg3yU13GAk3NMJV_o0PirQAAIkAgAChh-UUt_G8LPDSbVVHgQ")
-				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
-					gif.Caption = fmt.Sprintf("Drooling on yourself %s?", update.Message.From.FirstName)
-				} else {
-					gif.ReplyToMessageID = message.MessageID
-				}
+				gif = gifGenerate(
+					&update,
+					"CgACAgQAAxkBAAIEi2BidvEg3yU13GAk3NMJV_o0PirQAAIkAgAChh-UUt_G8LPDSbVVHgQ",
+					fmt.Sprintf("Drooling on yourself %s?", update.Message.From.FirstName),
+					false,
+					false,
+				)
+				break
 			case "wtf":
-				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAICbWBiMQW6JtqhSaQRUI3s_EXSI1TuAAJJAgACiAOUUrtigLpU3wfdHgQ")
-				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
-					gif.Caption = fmt.Sprintf("Not event an actual username WTF %s", update.Message.From.FirstName)
-				} else {
-					gif.ReplyToMessageID = message.MessageID
-				}
+				gif = gifGenerate(
+					&update,
+					"CgACAgQAAxkBAAICbWBiMQW6JtqhSaQRUI3s_EXSI1TuAAJJAgACiAOUUrtigLpU3wfdHgQ",
+					fmt.Sprintf("Not event an actual username WTF %s", update.Message.From.FirstName),
+					false,
+					false,
+				)
+				break
 			case "stfu":
-				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIEt2BifSIpPjUgjgABIlXtU6dV7fsOeQACUAIAAp49jFJFzO_VtudJUh4E")
-				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
-					gif.Caption = fmt.Sprintf("No one cares, STFU %s!", update.Message.From.FirstName)
-				} else {
-					gif.ReplyToMessageID = message.MessageID
-				}
+				gif = gifGenerate(
+					&update,
+					"CgACAgQAAxkBAAIEt2BifSIpPjUgjgABIlXtU6dV7fsOeQACUAIAAp49jFJFzO_VtudJUh4E",
+					fmt.Sprintf("No one cares, STFU %s!", update.Message.From.FirstName),
+					false,
+					false,
+				)
+				break
 			default:
 				continue
 			}
@@ -178,6 +224,40 @@ func main() {
 			messages[update.Message.Chat.ID][fmt.Sprintf("@%s", strings.ToLower(update.Message.From.UserName))] = update.Message
 		}
 	}
+}
+
+func gifGenerate(update *tgbotapi.Update, fileId, insult string, randomResponseCase, replyWithText bool) tgbotapi.AnimationConfig {
+	var gif tgbotapi.AnimationConfig
+	gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, fileId)
+	replyMessage, err := getMessage(update)
+	if err != nil {
+		if randomResponseCase {
+			gif.Caption = randomCase(insult)
+		} else {
+			gif.Caption = insult
+		}
+		return gif
+	}
+	if replyWithText {
+		if randomResponseCase {
+			gif.Caption = randomCase(replyMessage.Text)
+		} else {
+			gif.Caption = replyMessage.Text
+		}
+	}
+	gif.ReplyToMessageID = replyMessage.MessageID
+	return gif
+}
+
+func getMessage(update *tgbotapi.Update) (*tgbotapi.Message, error) {
+	if update.Message.ReplyToMessage != nil {
+		return update.Message.ReplyToMessage, nil
+	}
+	message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]
+	if !ok {
+		return nil, fmt.Errorf("no message from user found")
+	}
+	return message, nil
 }
 
 func randomCase(message string) string {
