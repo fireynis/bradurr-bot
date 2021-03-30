@@ -7,19 +7,6 @@ on:
     branches: [ master ]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.16
-      - name: Test
-        run: go test -v ./...
-        env:
-          GOOS: linux
-          GOARCH: amd64
   build:
     runs-on: ubuntu-latest
     steps:
@@ -29,14 +16,13 @@ jobs:
         with:
           go-version: 1.16
       - name: Build
-        run: go build -o bots/bradurr_bot
+        run: go build -o bots/bradurr_bot && ls
         env:
           GOOS: linux
           GOARCH: amd64
 
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
+      - name: Test
+        run: go test -v ./...
       - name: stop service
         uses: appleboy/ssh-action@master
         with:
