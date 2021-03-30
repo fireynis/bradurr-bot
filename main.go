@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"log"
 	"math/rand"
 	"os"
 	"strings"
 	"time"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 var prob = []bool{true, true, false, false, false}
@@ -71,6 +72,13 @@ func main() {
 				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAICOGBiJptsJgqu7CjI7wglyFpry5rFAAJUAgACu-uVUt2pTnE70uewHgQ")
 				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
 					gif.Caption = fmt.Sprintf("%s gets a dumbass gold star for no name sent, what a dumbass!", update.Message.From.FirstName)
+				} else {
+					gif.ReplyToMessageID = message.MessageID
+				}
+			case "magma":
+				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgEAAxkBAAIEcmBicgTC9R0ZMNginJB6ewKudpfhAAJsAQACXyUQR0jwan3HzlslHgQ")
+				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
+					gif.Caption = fmt.Sprintf("Not fucking lava dude %s", update.Message.From.FirstName)
 				} else {
 					gif.ReplyToMessageID = message.MessageID
 				}
