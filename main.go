@@ -103,6 +103,20 @@ func main() {
 				} else {
 					gif.ReplyToMessageID = message.MessageID
 				}
+			case "yousuck":
+				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIEv2BifdkT3G_j-GANz0CufXCvdHZuAAITAgACuhqsUcCIL8xUN9IfHgQ")
+				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
+					gif.Caption = fmt.Sprintf("%s, you suck donkey dick", update.Message.From.FirstName)
+				} else {
+					gif.ReplyToMessageID = message.MessageID
+				}
+			case "donkey":
+				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIEwmBifh6-60ypp0HnpFvbfLefd54TAAJHAgACv26lUrwh-zTY0RjfHgQ")
+				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
+					gif.Caption = fmt.Sprintf("%s, there's more ginger in this than a Weasley!", update.Message.From.FirstName)
+				} else {
+					gif.ReplyToMessageID = message.MessageID
+				}
 			case "wtf":
 				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAICbWBiMQW6JtqhSaQRUI3s_EXSI1TuAAJJAgACiAOUUrtigLpU3wfdHgQ")
 				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
