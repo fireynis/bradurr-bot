@@ -1,4 +1,4 @@
-name: Go
+name: Build and Deploy
 
 on:
   push:
@@ -7,19 +7,28 @@ on:
     branches: [ master ]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+      - name: Build
+        run: go build -o bradurr_bot
+        env:
+          GOOS: Linux
+          GOARCH: amd64
 
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.16
-
-    - name: Build
-      run: go build -v ./...
-
-    - name: Test
-      run: go test -v ./...
+      - name: Test
+        run: go test -v ./...
+      - name: Deploy
+        uses: appleboy/scp-action@0.0.1
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_KEY }}\
+          rm: true
+          source: "bradur_bot"
+          target: "${{ secrets.REMOTE_DIR }}"
