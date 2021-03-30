@@ -51,27 +51,13 @@ func main() {
 	updates, err := bot.GetUpdatesChan(u)
 
 	for update := range updates {
-		if update.Message.Document != nil && update.Message.Document.FileID != "" {
-			url, err := bot.GetFileDirectURL(update.Message.Document.FileID)
-			if err != nil {
-				logger.Error(err)
-				continue
-			}
-			logger.Infow(
-				"obtained new fileID",
-				zap.String("file_id", update.Message.Document.FileID),
-				zap.String("file_url", url),
-				zap.String("from_chat", update.Message.Chat.Title),
-				zap.String("from_user", update.Message.From.UserName),
-			)
-		}
 		if update.Message == nil {
 			continue
 		}
 		if update.Message.IsCommand() {
 			if strings.ToLower(update.Message.Command()) == "getgif" && update.Message.Chat.IsPrivate() {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok || message.Document == nil || message.Document.FileID == "" {
+				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.From.UserName)]; !ok || message.Document == nil || message.Document.FileID == "" {
 					msg.Text = "We ain't found shit"
 				} else {
 					msg.Text = message.Document.FileID
