@@ -131,7 +131,7 @@ func main() {
 				} else {
 					gif.ReplyToMessageID = message.MessageID
 				}
-			case "npc":
+			case "danger":
 				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIEsGBie58bKOeSXEHrVrvh-Gta5Wk_AAIrAgACiX-VUpZXPFLOB0VfHgQ")
 				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
 					gif.Caption = fmt.Sprintf("%s, YOU DON'T REALLY EXIST", update.Message.From.FirstName)
