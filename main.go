@@ -156,7 +156,7 @@ func main() {
 				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIEwmBifh6-60ypp0HnpFvbfLefd54TAAJHAgACv26lUrwh-zTY0RjfHgQ")
 				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
 					gif.Caption = fmt.Sprintf("%s, there's more ginger in this than a Weasley!", update.Message.From.FirstName)
-        } else {
+				} else {
 					gif.ReplyToMessageID = message.MessageID
 				}
 			case "drool":
