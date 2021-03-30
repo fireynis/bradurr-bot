@@ -57,7 +57,7 @@ func main() {
 		if update.Message.IsCommand() {
 			if strings.ToLower(update.Message.Command()) == "getgif" && update.Message.Chat.IsPrivate() {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.From.UserName)]; !ok || message.Document == nil || message.Document.FileID == "" {
+				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.From.FirstName)]; !ok || message.Document == nil || message.Document.FileID == "" {
 					msg.Text = "We ain't found shit"
 				} else {
 					msg.Text = message.Document.FileID
