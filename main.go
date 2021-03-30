@@ -82,6 +82,27 @@ func main() {
 				} else {
 					gif.ReplyToMessageID = message.MessageID
 				}
+			case "boobs":
+				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIEpmBieuj2CmF42NGZFMj5-LViv7sNAAIqAgACno3sUSMPJOU4zQYYHgQ")
+				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
+					gif.Caption = fmt.Sprintf("%s thirsty?", update.Message.From.FirstName)
+				} else {
+					gif.ReplyToMessageID = message.MessageID
+				}
+			case "npc":
+				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIEsGBie58bKOeSXEHrVrvh-Gta5Wk_AAIrAgACiX-VUpZXPFLOB0VfHgQ")
+				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
+					gif.Caption = fmt.Sprintf("%s, burn an inn lately?", update.Message.From.FirstName)
+				} else {
+					gif.ReplyToMessageID = message.MessageID
+				}
+			case "nerd":
+				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAIEs2BifFqTRTFAL-cM4Bhv66NW-FBoAAIaAgACP7CcUooP90RkGHy0HgQ")
+				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
+					gif.Caption = fmt.Sprintf("%s, you're a fucking nerd!", update.Message.From.FirstName)
+				} else {
+					gif.ReplyToMessageID = message.MessageID
+				}
 			case "wtf":
 				gif = tgbotapi.NewAnimationShare(update.Message.Chat.ID, "CgACAgQAAxkBAAICbWBiMQW6JtqhSaQRUI3s_EXSI1TuAAJJAgACiAOUUrtigLpU3wfdHgQ")
 				if message, ok := messages[update.Message.Chat.ID][strings.ToLower(update.Message.CommandArguments())]; !ok {
