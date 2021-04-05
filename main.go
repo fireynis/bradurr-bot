@@ -98,7 +98,7 @@ func main() {
 			case "cowboy":
 				gif = gifGenerate(
 					&update,
-					"AAMCBAADGQEAAgRsYGJwCA_1mY1qydjoehoFzS0S4ZwAAnACAALAMa1SBU-G3K6fQJXYIpQmXQADAQAHbQADb18AAh4E",
+					"CgACAgQAAxkBAAIHJmBrKSW6-BfQEj0y7yw9eOmVrI9YAAJwAgACwDGtUgVPhtyun0CVHgQ",
 					fmt.Sprintf("Nobody here, but still horny %s", update.Message.From.FirstName),
 					false,
 					false,
